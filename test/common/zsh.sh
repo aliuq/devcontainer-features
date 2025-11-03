@@ -8,8 +8,6 @@ source dev-container-features-test-lib
 check "default shell is zsh" bash -c 'echo $SHELL' | grep -q 'zsh$'
 # check .zshrc exists
 check "zshrc exists" bash -c 'test -f ~/.zshrc'
-# check the current user
-check "current user is non-root" bash -c 'whoami'
 
 # fzf
 check "fzf installed" fzf --version
