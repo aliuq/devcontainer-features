@@ -9,10 +9,10 @@ check "fzf installed" fzf --version
 # eza
 check "eza installed" eza --version
 # zoxide
-check "zoxide should be not installed" command -v zoxide && exit 1 || exit 0
+check "zoxide installed" zoxide --version
 # mise
 check "mise installed" mise --version
 # starship
-check "starship installed" starship --version
+check "starship not installed" bash -c 'if ! command -v starship &> /dev/null; then exit 0; else exit 1; fi'
 
 reportResults
