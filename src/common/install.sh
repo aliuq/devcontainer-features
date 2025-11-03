@@ -203,21 +203,7 @@ install_zoxide() {
   else
     echo "Installing zoxide..."
     check_packages curl ca-certificates unzip
-
-    # Download install script to temp directory
-    local install_script="/tmp/zoxide-install.sh"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o "$install_script"
-
-    # Inject PROXY_URL if provided
-    if [ -n "$PROXY_URL" ]; then
-      echo "Using proxy URL for zoxide installation: $PROXY_URL"
-      # Patch the install script to use the proxy URL
-      sed -i "s|https://api.github.com|${PROXY_URL}https://api.github.com|g" "$install_script"
-    fi
-
-    # Execute the modified script
-    sh "$install_script" --bin-dir="$BIN_DIR"
-    rm -f "$install_script"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir="$BIN_DIR"
 
     # Set up shell integration
     if [ "$use_omz" = "true" ]; then
