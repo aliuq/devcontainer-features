@@ -9,7 +9,7 @@ check "fzf installed" fzf --version
 # eza
 check "eza installed" eza --version
 # zoxide
-check "zoxide installed" zoxide --version
+check "zoxide should be not installed" command -v zoxide && exit 1 || exit 0
 # mise
 check "mise installed" mise --version
 # starship

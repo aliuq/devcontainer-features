@@ -17,6 +17,7 @@
         "configureZshAsDefaultShell": true
       },
       "common": {
+        "installZoxide": true,
         "proxyUrl": "https://dl.llll.host/"
       }
     }
