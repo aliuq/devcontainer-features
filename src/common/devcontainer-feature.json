@@ -34,11 +34,6 @@
       "default": true,
       "description": "Install mise (polyglot tool version manager)"
     },
-    "installMonaspaceFont": {
-      "type": "boolean",
-      "default": true,
-      "description": "Install Monaspace Nerd Font"
-    },
     "installStarship": {
       "type": "boolean",
       "default": true,
