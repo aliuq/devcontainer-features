@@ -1,0 +1,60 @@
+{
+  "id": "common",
+  "name": "Common Development Tools",
+  "version": "0.0.1",
+  "description": "Install and configure common development tools including eza, fzf, zoxide, mise, Monaspace Nerd Font, starship, and zsh plugins",
+  "options": {
+    "defaultShell": {
+      "type": "string",
+      "default": "zsh",
+      "description": "Set the default shell (bash or zsh)",
+      "enum": [
+        "bash",
+        "zsh"
+      ]
+    },
+    "installEza": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install eza (modern replacement for ls)"
+    },
+    "installFzf": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install fzf (fuzzy finder)"
+    },
+    "installZoxide": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install zoxide (smarter cd command)"
+    },
+    "installMise": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install mise (polyglot tool version manager)"
+    },
+    "installMonaspaceFont": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install Monaspace Nerd Font"
+    },
+    "installStarship": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install starship prompt"
+    },
+    "starshipConfigUrl": {
+      "type": "string",
+      "default": "",
+      "description": "URL to a starship.toml configuration file to download and use"
+    },
+    "installZshPlugins": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install zsh-autosuggestions and zsh-syntax-highlighting"
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ]
+}
