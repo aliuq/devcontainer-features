@@ -19,6 +19,7 @@ INSTALL_STARSHIP="${INSTALLSTARSHIP:-"true"}"
 STARSHIP_CONFIG_URL="${STARSHIPCONFIGURL:-""}"
 INSTALL_ZSH_PLUGINS="${INSTALLZSHPLUGINS:-"true"}"
 BIN_DIR="${BINDIR:-"/usr/local/bin"}"
+PROXY_URL="${PROXYURL:-""}"
 
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -202,7 +203,21 @@ install_zoxide() {
   else
     echo "Installing zoxide..."
     check_packages curl ca-certificates unzip
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir="$BIN_DIR"
+
+    # Download install script to temp directory
+    local install_script="/tmp/zoxide-install.sh"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o "$install_script"
+
+    # Inject PROXY_URL if provided
+    if [ -n "$PROXY_URL" ]; then
+      echo "Using proxy URL for zoxide installation: $PROXY_URL"
+      # Patch the install script to use the proxy URL
+      sed -i "s|https://api.github.com|${PROXY_URL}https://api.github.com|g" "$install_script"
+    fi
+
+    # Execute the modified script
+    sh "$install_script" --bin-dir="$BIN_DIR"
+    rm -f "$install_script"
 
     # Set up shell integration
     if [ "$use_omz" = "true" ]; then

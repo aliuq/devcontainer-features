@@ -75,7 +75,7 @@
 | `installFzf` | boolean | `true` | 安装 fzf (模糊查找) |
 | `installZoxide` | boolean | `true` | 安装 zoxide (智能 cd) |
 | `installMise` | boolean | `true` | 安装 mise (工具版本管理) |
-| `installStarship` | boolean | `true` | 安装 starship 提示符 |
+| `installStarship` | boolean | `false` | 安装 starship 提示符 |
 | `starshipConfigUrl` | string | `""` | 自定义 starship 配置文件的 URL（留空使用默认配置） |
 | `installZshPlugins` | boolean | `true` | 安装 zsh 插件（仅在 Oh-My-Zsh 存在时生效） |
 

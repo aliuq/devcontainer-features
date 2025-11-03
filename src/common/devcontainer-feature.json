@@ -36,7 +36,7 @@
     },
     "installStarship": {
       "type": "boolean",
-      "default": true,
+      "default": false,
       "description": "Install starship prompt"
     },
     "starshipConfigUrl": {
@@ -48,6 +48,11 @@
       "type": "boolean",
       "default": true,
       "description": "Install zsh-autosuggestions and zsh-syntax-highlighting"
+    },
+    "proxyUrl": {
+      "type": "string",
+      "default": "",
+      "description": "URL of the proxy server to use for downloading resources (e.g., https://proxy.example.com:8080/), ends with a slash '/'"
     }
   },
   "installsAfter": [
