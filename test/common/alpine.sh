@@ -16,7 +16,6 @@ check "fzf installed" fzf --version
 check "fzf integration" bash -c 'grep -q "fzf" ~/.zshrc && exit 0 || exit 1'
 # eza
 check "eza installed" eza --version
-check "eza integration" bash -c 'grep -q "eza" ~/.zshrc && exit 0 || exit 1'
 # zoxide
 check "zoxide installed" zoxide --version
 check "zoxide integration" bash -c 'grep -q "zoxide" ~/.zshrc && exit 0 || exit 1'

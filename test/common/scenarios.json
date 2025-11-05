@@ -18,5 +18,25 @@
         "installStarship": true
       }
     }
+  },
+  "bash": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {
+        "installZsh": true
+      },
+      "common": {
+        "defaultShell": "bash",
+        "installStarship": true
+      }
+    }
+  },
+  "alpine": {
+    "image": "mcr.microsoft.com/devcontainers/base:alpine",
+    "features": {
+      "common": {
+        "installStarship": true
+      }
+    }
   }
 }

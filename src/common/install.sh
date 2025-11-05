@@ -29,11 +29,6 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-if [ -z "${_REMOTE_USER}" ]; then
-  echo -e 'Feature script hope to be executed by a tool that implements the dev container specification.'
-  _REMOTE_USER="$(whoami)"
-fi
-
 # Ensure that login shells get the correct path if the user updated the PATH using ENV.
 rm -f /etc/profile.d/00-restore-env.sh
 echo "export PATH=${PATH//$(sh -lc 'echo $PATH')/\$PATH}" >/etc/profile.d/00-restore-env.sh
@@ -74,6 +69,10 @@ i?86) architecture="i386" ;;
 esac
 
 echo "Detected platform: ${ADJUSTED_ID} (${ID}), architecture: ${architecture}"
+
+if [ -z "${_REMOTE_USER}" ]; then
+  echo -e 'Feature script hope to be executed by a tool that implements the dev container specification.'
+fi
 
 if [ "${_REMOTE_USER}" != "root" ]; then
   user_home="/home/${_REMOTE_USER}"
@@ -132,10 +131,7 @@ _pkg_updated="false"
 check_packages() {
   if [ "$ADJUSTED_ID" = "debian" ]; then
     if ! dpkg -s "$@" >/dev/null 2>&1; then
-      if [ "${_pkg_updated}" = "false" ]; then
-        pkg_mgr_update
-        _pkg_updated="true"
-      fi
+      pkg_mgr_update
       apt-get -y install --no-install-recommends "$@"
     fi
   elif [ "$ADJUSTED_ID" = "alpine" ]; then
@@ -147,6 +143,25 @@ check_packages() {
   else
     echo "Unsupported Linux distribution: ${ADJUSTED_ID} (${ID})"
     exit 1
+  fi
+}
+
+_add_omz_plugin() {
+  local plugin_name="$1"
+  if [ "$use_omz" = "true" ] && [ -n "$current_shell_rc" ]; then
+    if ! grep -q "plugins=.*${plugin_name}" "$current_shell_rc"; then
+      sed -i "s/^plugins=(\(.*\))/plugins=(\1 ${plugin_name})/" "$current_shell_rc"
+    fi
+  fi
+}
+
+_add_shell_config() {
+  local shell_type="$1"
+  local init_command="$2"
+  if [ -n "$current_shell_rc" ] && [ "$shell_type" = "$current_shell" ]; then
+    if ! grep -qF "$init_command" "$current_shell_rc"; then
+      echo "$init_command" >>"$current_shell_rc"
+    fi
   fi
 }
 
@@ -177,22 +192,12 @@ install_fzf() {
     /tmp/fzf/install --bin --no-key-bindings --no-completion --no-update-rc
     cp /tmp/fzf/bin/fzf "$BIN_DIR/fzf"
     rm -rf /tmp/fzf
-
-    # Set up shell integration
-    if [ "$use_omz" = "true" ]; then
-      echo "Detected oh-my-zsh installation, configuring fzf via oh-my-zsh plugin."
-      # Enable fzf plugin in oh-my-zsh (only if not already present)
-      if ! grep -q 'plugins=.*fzf' "$current_shell_rc"; then
-        sed -i 's/^plugins=(\(.*\))/plugins=(\1 fzf)/' "$current_shell_rc"
-      fi
-    elif [ "$current_shell" = "bash" ]; then
-      echo 'eval "$(fzf --bash)"' >>"$current_shell_rc"
-    elif [ "$current_shell" = "zsh" ]; then
-      echo 'source <(fzf --zsh)' >>"$current_shell_rc"
-    else
-      echo "Unsupported shell for fzf integration: $current_shell"
-    fi
   fi
+
+  # Set up shell integration
+  _add_omz_plugin fzf
+  _add_shell_config bash 'eval "$(fzf --bash)"'
+  _add_shell_config zsh 'source <(fzf --zsh)'
 }
 
 # zoxide
@@ -203,23 +208,27 @@ install_zoxide() {
   else
     echo "Installing zoxide..."
     check_packages curl ca-certificates unzip
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir="$BIN_DIR"
 
-    # Set up shell integration
-    if [ "$use_omz" = "true" ]; then
-      echo "Detected oh-my-zsh installation, configuring zoxide via oh-my-zsh plugin."
-      # Enable zoxide plugin in oh-my-zsh (only if not already present)
-      if ! grep -q 'plugins=.*zoxide' "$current_shell_rc"; then
-        sed -i 's/^plugins=(\(.*\))/plugins=(\1 zoxide)/' "$current_shell_rc"
-      fi
-    elif [ "$current_shell" = "bash" ]; then
-      echo 'eval "$(zoxide init bash)"' >>"$current_shell_rc"
-    elif [ "$current_shell" = "zsh" ]; then
-      echo 'eval "$(zoxide init zsh)"' >>"$current_shell_rc"
-    else
-      echo "Unsupported shell for zoxide integration: $current_shell"
+    # Download install script to local file
+    local install_script="/tmp/zoxide-install.sh"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o "$install_script"
+
+    # Replace GitHub API URLs with proxy if PROXY_URL is set
+    if [ -n "$PROXY_URL" ]; then
+      # Remove trailing slash from PROXY_URL if present
+      local proxy="${PROXY_URL%/}"
+      sed -i "s|https://api.github.com|${proxy}/https://api.github.com|g" "$install_script"
     fi
+
+    # Execute the modified script
+    sh "$install_script" --bin-dir="$BIN_DIR"
+    rm -f "$install_script"
   fi
+
+  # Set up shell integration
+  _add_omz_plugin zoxide
+  _add_shell_config bash 'eval "$(zoxide init bash)"'
+  _add_shell_config zsh 'eval "$(zoxide init zsh)"'
 }
 
 # eza
@@ -243,16 +252,10 @@ install_eza() {
       echo "Linux distro ${ID} not supported for eza installation."
       exit 1
     fi
-
-    # Set up shell integration
-    if [ "$use_omz" = "true" ]; then
-      echo "Detected oh-my-zsh installation, configuring eza via oh-my-zsh plugin."
-      # Enable eza plugin in oh-my-zsh (only if not already present)
-      if ! grep -q 'plugins=.*eza' "$current_shell_rc"; then
-        sed -i 's/^plugins=(\(.*\))/plugins=(\1 eza)/' "$current_shell_rc"
-      fi
-    fi
   fi
+
+  # Set up shell integration
+  _add_omz_plugin eza
 }
 
 # mise
@@ -265,22 +268,12 @@ install_mise() {
     check_packages curl
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
     curl -fsSL https://mise.run | sh
-
-    # Set up shell integration
-    if [ "$use_omz" = "true" ]; then
-      echo "Detected oh-my-zsh installation, configuring mise via oh-my-zsh plugin."
-      # Enable mise plugin in oh-my-zsh (only if not already present)
-      if ! grep -q 'plugins=.*mise' "$current_shell_rc"; then
-        sed -i 's/^plugins=(\(.*\))/plugins=(\1 mise)/' "$current_shell_rc"
-      fi
-    elif [ "$current_shell" = "bash" ]; then
-      echo "eval \"\$(${MISE_INSTALL_PATH} activate bash)\"" >>"$current_shell_rc"
-    elif [ "$current_shell" = "zsh" ]; then
-      echo "eval \"\$(${MISE_INSTALL_PATH} activate zsh)\"" >>"$current_shell_rc"
-    else
-      echo "Unsupported shell for mise integration: $current_shell"
-    fi
   fi
+
+  # Set up shell integration
+  _add_omz_plugin mise
+  _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash)\""
+  _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh)\""
 }
 
 # starship
@@ -292,33 +285,23 @@ install_starship() {
     echo "Installing starship..."
     check_packages curl unzip
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y --bin-dir="$BIN_DIR"
+  fi
 
-    # Set up shell integration
-    if [ "$use_omz" = "true" ]; then
-      echo "Detected oh-my-zsh installation, configuring starship via oh-my-zsh plugin."
-      # Enable starship plugin in oh-my-zsh (only if not already present)
-      if ! grep -q 'plugins=.*starship' "$current_shell_rc"; then
-        sed -i 's/^plugins=(\(.*\))/plugins=(\1 starship)/' "$current_shell_rc"
-      fi
-    elif [ "$current_shell" = "bash" ]; then
-      echo 'eval "$(starship init bash)"' >>"$current_shell_rc"
-    elif [ "$current_shell" = "zsh" ]; then
-      echo 'source <(starship init zsh)' >>"$current_shell_rc"
+  # Set up shell integration
+  _add_omz_plugin starship
+  _add_shell_config bash 'eval "$(starship init bash)"'
+  _add_shell_config zsh 'eval "$(starship init zsh)"'
+
+  # Starship config
+  local conf="${user_home}/.config/starship.toml"
+  if [ ! -f "$conf" ]; then
+    mkdir -p "${user_home}/.config"
+    if [ -n "$STARSHIP_CONFIG_URL" ]; then
+      echo "Downloading starship configuration from $STARSHIP_CONFIG_URL"
+      curl -fsSL "$STARSHIP_CONFIG_URL" -o "$conf" || echo "Failed to download starship config, using default."
     else
-      echo "Unsupported shell for starship integration: $current_shell"
-    fi
-
-    # Starship config
-    local conf="${user_home}/.config/starship.toml"
-    if [ ! -f "$conf" ]; then
-      mkdir -p "${user_home}/.config"
-      if [ -n "$STARSHIP_CONFIG_URL" ]; then
-        echo "Downloading starship configuration from $STARSHIP_CONFIG_URL"
-        curl -fsSL "$STARSHIP_CONFIG_URL" -o "$conf" || echo "Failed to download starship config, using default."
-      else
-        echo "Creating default starship configuration."
-        cp -f "${FEATURE_DIR}/scripts/starship.toml" "$conf"
-      fi
+      echo "Creating default starship configuration."
+      cp -f "${FEATURE_DIR}/scripts/starship.toml" "$conf"
     fi
   fi
 }
