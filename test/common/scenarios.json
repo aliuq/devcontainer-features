@@ -10,5 +10,13 @@
         "installStarship": true
       }
     }
+  },
+  "repeated": {
+    "image": "ghcr.io/aliuq/devcontainer:base",
+    "features": {
+      "common": {
+        "installStarship": true
+      }
+    }
   }
 }
