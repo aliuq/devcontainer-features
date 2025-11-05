@@ -332,8 +332,18 @@ load_zsh_plugins() {
   check_packages git
 
   local custom_plugins_dir="${ZSH_CUSTOM:-${user_home}/.oh-my-zsh/custom}/plugins"
-  git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${custom_plugins_dir}/zsh-autosuggestions
-  git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ${custom_plugins_dir}/zsh-syntax-highlighting
+  # zsh-autosuggestions
+  local autosuggestions_dir="${custom_plugins_dir}/zsh-autosuggestions"
+  if [ ! -d "$autosuggestions_dir" ]; then
+    echo "Installing zsh-autosuggestions plugin..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$autosuggestions_dir"
+  fi
+  # zsh-syntax-highlighting
+  local syntax_highlighting_dir="${custom_plugins_dir}/zsh-syntax-highlighting"
+  if [ ! -d "$syntax_highlighting_dir" ]; then
+    echo "Installing zsh-syntax-highlighting plugin..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "$syntax_highlighting_dir"
+  fi
 
   # Enable plugins in oh-my-zsh (only if not already present)
   if ! grep -q 'plugins=.*zsh-autosuggestions' "$current_shell_rc"; then
