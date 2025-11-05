@@ -158,6 +158,10 @@ _add_omz_plugin() {
 _add_shell_config() {
   local shell_type="$1"
   local init_command="$2"
+  if [ "$use_omz" = "true" ]; then
+    return
+  fi
+
   if [ -n "$current_shell_rc" ] && [ "$shell_type" = "$current_shell" ]; then
     if ! grep -qF "$init_command" "$current_shell_rc"; then
       echo "$init_command" >>"$current_shell_rc"
