@@ -288,10 +288,15 @@ install_mise() {
 
   # Set up shell integration
   _add_omz_plugin mise
-  _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash)\""
-  _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash --shims)\"" "${user_home}/.bash_profile"
-  _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh)\""
-  _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh --shims)\"" "${user_home}/.zprofile"
+  _add_shell_config bash 'eval "$(mise activate bash)"'
+  _add_shell_config zsh 'eval "$(mise activate zsh)"'
+
+  # Add shims to shell profile for login shells
+  if [ "$current_shell" = "zsh" ]; then
+	  echo 'eval "$(mise activate zsh --shims)"' >> "${user_home}/.zprofile"
+	elif [ "$current_shell" = "bash" ]; then
+	  echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.bash_profile"
+	fi
 
   # Install mise required dependencies
   # Completions
