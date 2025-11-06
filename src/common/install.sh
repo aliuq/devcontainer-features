@@ -163,8 +163,9 @@ _add_shell_config() {
   local shell_type="$1"
   local init_command="$2"
   local shell_rc="${3:-$current_shell_rc}"
+  local check_omz="${4:-true}"
 
-  if [ "$use_omz" = "true" ]; then
+  if [ "$use_omz" = "true" ] && [ "$check_omz" = "true" ]; then
     return
   fi
 
@@ -289,14 +290,11 @@ install_mise() {
   # Set up shell integration
   _add_omz_plugin mise
   _add_shell_config bash 'eval "$(mise activate bash)"'
+  touch "${user_home}/.bash_profile"
+  _add_shell_config bash 'eval "$(mise activate bash --shims)"' "${user_home}/.bash_profile" false
   _add_shell_config zsh 'eval "$(mise activate zsh)"'
-
-  # Add shims to shell profile for login shells
-  if [ "$current_shell" = "zsh" ]; then
-	  echo 'eval "$(mise activate zsh --shims)"' >> "${user_home}/.zprofile"
-	elif [ "$current_shell" = "bash" ]; then
-	  echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.bash_profile"
-	fi
+  touch "${user_home}/.zprofile"
+  _add_shell_config zsh 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile" false
 
   # Install mise required dependencies
   # Completions
