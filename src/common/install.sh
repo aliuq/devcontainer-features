@@ -301,6 +301,18 @@ install_mise() {
     mkdir -p "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
     chown -R ${USERNAME}:${group_name} "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
   fi
+
+  # ref: https://mise.jdx.dev/installing-mise.html#autocompletion
+  if [ ! "$use_omz" = "true" ]; then
+    if [ $current_shell = "zsh" ]; then
+      mkdir -p /usr/local/share/zsh/site-functions
+      mise completion zsh >/usr/local/share/zsh/site-functions/_mise
+    elif [ $current_shell = "bash" ]; then
+      mkdir -p ${user_home}/.local/share/bash-completion/completions/
+      mise completion bash --include-bash-completion-lib >${user_home}/.local/share/bash-completion/completions/mise
+    fi
+  fi
+
 }
 
 # starship
