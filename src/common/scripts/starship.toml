@@ -6,8 +6,8 @@ palette = "dracula"
 
 
 [character]
-error_symbol = "[❯](bold red)"
-success_symbol = "[❯](bold green)"
+error_symbol = "[>](bold red)"
+success_symbol = "[>](bold green)"
 
 [cmd_duration]
 style = "bold yellow"
@@ -55,9 +55,13 @@ disabled = false
 style = 'bold cyan'
 format = '[$indicator]($style) '
 fish_indicator = '󰈺 '
-powershell_indicator = '_'
+powershell_indicator = '>_'
 disabled = false
 
+[container]
+symbol = " "
+style = "bold blue"
+format = '[$symbol $name]($style) '
 
 # Define Dracula color palette
 [palettes.dracula]
