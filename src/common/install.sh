@@ -76,11 +76,15 @@ fi
 
 if [ "${_REMOTE_USER}" != "root" ]; then
   user_home="/home/${_REMOTE_USER}"
+  USERNAME="${_REMOTE_USER}"
+  group_name=$(id -gn "${_REMOTE_USER}")
 else
   user_home="/root"
+  USERNAME="root"
+  group_name="root"
 fi
 
-echo "Detected user: ${_REMOTE_USER} (${user_home})"
+echo "Detected user: ${_REMOTE_USER} (${user_home}), U: ${USERNAME}, G: ${group_name}"
 
 current_shell=${DEFAULT_SHELL:-$(basename "$SHELL")}
 current_shell_rc=""
@@ -271,13 +275,32 @@ install_mise() {
     echo "Installing mise..."
     check_packages curl
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
+    export MISE_DATA_DIR="${user_home}/.local/share/mise"
+    export MISE_STATE_DIR="${user_home}/.local/state/mise"
+    export MISE_CONFIG_DIR="${user_home}/.config/mise"
+    export MISE_CACHE_DIR="${user_home}/.cache/mise"
     curl -fsSL https://mise.run | sh
+    # Ensure correct ownership if not installing as root
+    chown ${USERNAME}:${group_name} "${MISE_INSTALL_PATH}"
   fi
 
   # Set up shell integration
   _add_omz_plugin mise
   _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash)\""
   _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh)\""
+
+  # Install mise required dependencies
+  # Completions
+  ! command_exists usage && mise use -g usage -y
+  # Clean cache
+  mise cache clear
+
+  # 修正 mise use 带来的权限问题
+  # TODO: 多次运行会重复 chown，待优化
+  if [ "${USERNAME}" != "root" ]; then
+    mkdir -p "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
+    chown -R ${USERNAME}:${group_name} "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
+  fi
 }
 
 # starship

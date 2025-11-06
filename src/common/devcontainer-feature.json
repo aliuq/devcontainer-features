@@ -57,5 +57,8 @@
   },
   "installsAfter": [
     "ghcr.io/devcontainers/features/common-utils"
-  ]
+  ],
+  "containerEnv": {
+    "LANG": "en_US.UTF-8"
+  }
 }
