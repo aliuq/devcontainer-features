@@ -162,13 +162,15 @@ _add_omz_plugin() {
 _add_shell_config() {
   local shell_type="$1"
   local init_command="$2"
+  local shell_rc="${3:-$current_shell_rc}"
+
   if [ "$use_omz" = "true" ]; then
     return
   fi
 
-  if [ -n "$current_shell_rc" ] && [ "$shell_type" = "$current_shell" ]; then
-    if ! grep -qF "$init_command" "$current_shell_rc"; then
-      echo "$init_command" >>"$current_shell_rc"
+  if [ -n "$shell_rc" ] && [ "$shell_type" = "$current_shell" ]; then
+    if ! grep -qF "$init_command" "$shell_rc"; then
+      echo "$init_command" >>"$shell_rc"
     fi
   fi
 }
@@ -287,7 +289,9 @@ install_mise() {
   # Set up shell integration
   _add_omz_plugin mise
   _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash)\""
+  _add_shell_config bash "eval \"\$(${MISE_INSTALL_PATH} activate bash --shims)\"" "${user_home}/.bash_profile"
   _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh)\""
+  _add_shell_config zsh "eval \"\$(${MISE_INSTALL_PATH} activate zsh --shims)\"" "${user_home}/.zprofile"
 
   # Install mise required dependencies
   # Completions
