@@ -278,10 +278,10 @@ install_mise() {
     echo "Installing mise..."
     check_packages curl
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
-    export MISE_DATA_DIR="${user_home}/.local/share/mise"
-    export MISE_STATE_DIR="${user_home}/.local/state/mise"
-    export MISE_CONFIG_DIR="${user_home}/.config/mise"
-    export MISE_CACHE_DIR="${user_home}/.cache/mise"
+    # export MISE_DATA_DIR="${user_home}/.local/share/mise"
+    # export MISE_STATE_DIR="${user_home}/.local/state/mise"
+    # export MISE_CONFIG_DIR="${user_home}/.config/mise"
+    # export MISE_CACHE_DIR="${user_home}/.cache/mise"
     curl -fsSL https://mise.run | sh
     # Ensure correct ownership if not installing as root
     chown ${USERNAME}:${group_name} "${MISE_INSTALL_PATH}"
@@ -289,12 +289,22 @@ install_mise() {
 
   # Set up shell integration
   _add_omz_plugin mise
-  _add_shell_config bash 'eval "$(mise activate bash)"'
-  touch "${user_home}/.bash_profile"
-  _add_shell_config bash 'eval "$(mise activate bash --shims)"' "${user_home}/.bash_profile" false
-  _add_shell_config zsh 'eval "$(mise activate zsh)"'
-  touch "${user_home}/.zprofile"
-  _add_shell_config zsh 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile" false
+
+  if [ "$current_shell" = "bash" ]; then
+    if ! grep -qF 'eval "$(mise activate bash)"' "$current_shell_rc"; then
+      echo 'eval "$(mise activate bash)"' >> $current_shell_rc
+    fi
+    if [ -f "${user_home}/.profile" ] && ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.profile"; then
+      echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.profile"
+    fi
+  elif [ "$current_shell" = "zsh" ]; then
+    if [ ! "$use_omz" = "true" ] && ! grep -qF 'eval "$(mise activate zsh)"' "$current_shell_rc"; then
+      echo 'eval "$(mise activate zsh)"' >> $current_shell_rc
+    fi
+    if [ -f "${user_home}/.zprofile" ] && ! grep -qF 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile"; then
+      echo 'eval "$(mise activate zsh --shims)"' >> "${user_home}/.zprofile"
+    fi
+  fi
 
   # Install mise required dependencies
   # Completions
@@ -304,10 +314,10 @@ install_mise() {
 
   # 修正 mise use 带来的权限问题
   # TODO: 多次运行会重复 chown，待优化
-  if [ "${USERNAME}" != "root" ]; then
-    mkdir -p "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
-    chown -R ${USERNAME}:${group_name} "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
-  fi
+  # if [ "${USERNAME}" != "root" ]; then
+  #   mkdir -p "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
+  #   chown -R ${USERNAME}:${group_name} "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
+  # fi
 
   # ref: https://mise.jdx.dev/installing-mise.html#autocompletion
   if [ ! "$use_omz" = "true" ]; then
