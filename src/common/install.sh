@@ -290,18 +290,25 @@ install_mise() {
   # Set up shell integration
   _add_omz_plugin mise
 
-  if [ "$current_shell" = "bash" ]; then
-    if ! grep -qF 'eval "$(mise activate bash)"' "$current_shell_rc"; then
-      echo 'eval "$(mise activate bash)"' >> $current_shell_rc
+  # bash
+  if [ -f "${user_home}/.bashrc" ] && ! grep -qF 'eval "$(mise activate bash)"' "${user_home}/.bashrc"; then
+		echo 'eval "$(mise activate bash)"' >> "${user_home}/.bashrc"
+	fi
+  if [ -f "${user_home}/.bash_profile" ]; then
+    if ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.bash_profile"; then
+      echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.bash_profile"
     fi
-    if [ -f "${user_home}/.profile" ] && ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.profile"; then
+  elif [ -f "${user_home}/.profile" ]; then
+    if ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.profile"; then
       echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.profile"
     fi
-  elif [ "$current_shell" = "zsh" ]; then
-    if [ ! "$use_omz" = "true" ] && ! grep -qF 'eval "$(mise activate zsh)"' "$current_shell_rc"; then
-      echo 'eval "$(mise activate zsh)"' >> $current_shell_rc
-    fi
-    if [ -f "${user_home}/.zprofile" ] && ! grep -qF 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile"; then
+  fi
+  # zsh
+  if [ ! "$use_omz" = "true" ] && [ -f "${user_home}/.zshrc" ] && ! grep -qF 'eval "$(mise activate zsh)"' "${user_home}/.zshrc"; then
+    echo 'eval "$(mise activate zsh)"' >> "${user_home}/.zshrc"
+  fi
+  if [ -f "${user_home}/.zprofile" ]; then
+    if ! grep -qF 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile"; then
       echo 'eval "$(mise activate zsh --shims)"' >> "${user_home}/.zprofile"
     fi
   fi
