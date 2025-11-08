@@ -20,6 +20,7 @@ STARSHIP_CONFIG_URL="${STARSHIPCONFIGURL:-""}"
 INSTALL_ZSH_PLUGINS="${INSTALLZSHPLUGINS:-"true"}"
 BIN_DIR="${BINDIR:-"/usr/local/bin"}"
 PROXY_URL="${PROXYURL:-""}"
+MISE_PACKAGES="${MISEPACKAGES:-""}"
 
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -75,12 +76,16 @@ if [ -z "${_REMOTE_USER}" ]; then
 fi
 
 if [ "${_REMOTE_USER}" != "root" ]; then
-  user_home="/home/${_REMOTE_USER}"
+  if [ -z "$(getent passwd "${_REMOTE_USER}")" ]; then
+    echo -e "User \"${_REMOTE_USER}\" does not exist. Please use \"ghcr.io/devcontainers/features/common-utils\" feature to create the user."
+    exit 1
+  fi
   USERNAME="${_REMOTE_USER}"
+  user_home="/home/${_REMOTE_USER}"
   group_name=$(id -gn "${_REMOTE_USER}")
 else
-  user_home="/root"
   USERNAME="root"
+  user_home="/root"
   group_name="root"
 fi
 
@@ -172,6 +177,18 @@ _add_shell_config() {
   if [ -n "$shell_rc" ] && [ "$shell_type" = "$current_shell" ]; then
     if ! grep -qF "$init_command" "$shell_rc"; then
       echo "$init_command" >>"$shell_rc"
+    fi
+  fi
+}
+
+_update_bin_user() {
+  local bin_path="$1"
+  if [ -f "$bin_path" ]; then
+    local old_stat="$(stat -c '%u:%g' "$bin_path")"
+    local expected_stat="$(id -u ${USERNAME}):$(id -g ${USERNAME})"
+    if [ "$old_stat" != "$expected_stat" ]; then
+      echo "Correcting ownership of $bin_path binary... from $old_stat to $expected_stat"
+      chown ${USERNAME}:${group_name} "$bin_path"
     fi
   fi
 }
@@ -274,22 +291,27 @@ install_eza() {
 install_mise() {
   if command_exists mise; then
     echo "mise is already installed, skipping."
+    _update_bin_user "$(which mise)"
   else
     echo "Installing mise..."
     check_packages curl
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
-    export MISE_DATA_DIR="${user_home}/.local/share/mise"
-    export MISE_STATE_DIR="${user_home}/.local/state/mise"
-    export MISE_CONFIG_DIR="${user_home}/.config/mise"
-    export MISE_CACHE_DIR="${user_home}/.cache/mise"
     curl -fsSL https://mise.run | sh
     # Ensure correct ownership if not installing as root
     chown ${USERNAME}:${group_name} "${MISE_INSTALL_PATH}"
   fi
 
+  if [ "${USERNAME}" != "root" ]; then
+    export MISE_DATA_DIR="${user_home}/.local/share/mise"
+    export MISE_STATE_DIR="${user_home}/.local/state/mise"
+    export MISE_CONFIG_DIR="${user_home}/.config/mise"
+    export MISE_CACHE_DIR="${user_home}/.cache/mise"
+  fi
+
   # Set up shell integration
   _add_omz_plugin mise
 
+  # ref: https://mise.jdx.dev/dev-tools/shims.html#how-to-add-mise-shims-to-path
   # bash
   if [ -f "${user_home}/.bashrc" ] && ! grep -qF 'eval "$(mise activate bash)"' "${user_home}/.bashrc"; then
 		echo 'eval "$(mise activate bash)"' >> "${user_home}/.bashrc"
@@ -313,17 +335,39 @@ install_mise() {
     fi
   fi
 
-  # Install mise required dependencies
-  # Completions
-  ! command_exists usage && mise use -g usage -y
-  # Clean cache
-  mise cache clear
+  local mise_pkg_installed=""
 
-  # 修正 mise use 带来的权限问题
-  # TODO: 多次运行会重复 chown，待优化
+  # install deps
+  if mise which usage >/dev/null 2>&1; then
+    echo "mise 'usage' package is already installed, skipping."
+  else
+    echo "Installing mise usage package..."
+    mise use -g -y usage
+    mise_pkg_installed="true"
+  fi
+
+  if [ -n "${MISE_PACKAGES}" ]; then
+    # Support Format: 
+    # 1. `node@lts bun yarn@1 pnpm`
+    # 2. `node@lts  bun yarn@1  pnpm`
+    # 3. `node@lts,bun,yarn@1,pnpm`
+    # 4. `node@lts, bun, yarn@1,pnpm`
+    MISE_PACKAGES="$(echo "${MISE_PACKAGES}" | tr ',' ' ' | xargs)"
+    echo "Installing mise packages: ${MISE_PACKAGES} ..."
+    mise use -g -y ${MISE_PACKAGES}
+    mise_pkg_installed="true"
+  fi
+  
+  # Clean cache
+  if [ "$mise_pkg_installed" = "true" ]; then
+    echo "Cleaning mise cache..."
+    mise cache clear
+  fi
+
+  # Ensure config, cache, local dirs exist with correct ownership
   if [ "${USERNAME}" != "root" ]; then
-    mkdir -p "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
-    chown -R ${USERNAME}:${group_name} "${user_home}/.cache" "${user_home}/.local" "${user_home}/.config"
+    mkdir -p "${user_home}/.config/mise" "${user_home}/.cache" "${user_home}/.local"
+    chown -R ${USERNAME}:${group_name} "${user_home}/.config/mise" "${user_home}/.cache" "${user_home}/.local"
   fi
 
   # ref: https://mise.jdx.dev/installing-mise.html#autocompletion
@@ -336,7 +380,6 @@ install_mise() {
       mise completion bash --include-bash-completion-lib >${user_home}/.local/share/bash-completion/completions/mise
     fi
   fi
-
 }
 
 # starship
@@ -383,12 +426,16 @@ load_zsh_plugins() {
   if [ ! -d "$autosuggestions_dir" ]; then
     echo "Installing zsh-autosuggestions plugin..."
     git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$autosuggestions_dir"
+  else
+    echo "zsh-autosuggestions plugin already installed, skipping."
   fi
   # zsh-syntax-highlighting
   local syntax_highlighting_dir="${custom_plugins_dir}/zsh-syntax-highlighting"
   if [ ! -d "$syntax_highlighting_dir" ]; then
     echo "Installing zsh-syntax-highlighting plugin..."
     git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "$syntax_highlighting_dir"
+  else
+    echo "zsh-syntax-highlighting plugin already installed, skipping."
   fi
 
   # Enable plugins in oh-my-zsh (only if not already present)
@@ -407,7 +454,7 @@ check_packages curl git unzip ca-certificates
 [ "$INSTALL_ZOXIDE" = "true" ] && install_zoxide
 [ "$INSTALL_EZA" = "true" ] && install_eza
 [ "$INSTALL_STARSHIP" = "true" ] && install_starship
-[ "$INSTALL_MISE" = "true" ] && install_mise
 [ "$INSTALL_ZSH_PLUGINS" = "true" ] && load_zsh_plugins
+[ "$INSTALL_MISE" = "true" ] && install_mise
 clean_up
 echo "Done!"

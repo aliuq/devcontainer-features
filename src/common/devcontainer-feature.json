@@ -53,6 +53,11 @@
       "type": "string",
       "default": "",
       "description": "URL of the proxy server to use for downloading resources (e.g., https://proxy.example.com:8080/), ends with a slash '/'"
+    },
+    "misePackages": {
+      "type": "string",
+      "default": "",
+      "description": "Comma-separated list of mise packages to install globally (e.g., 'node@lts bun yarn@1 pnpm')"
     }
   },
   "installsAfter": [
