@@ -24,6 +24,7 @@ Install and configure common development tools including eza, fzf, zoxide, mise,
 | starshipConfigUrl | URL to a starship.toml configuration file to download and use | string | - |
 | installZshPlugins | Install zsh-autosuggestions and zsh-syntax-highlighting | boolean | true |
 | proxyUrl | URL of the proxy server to use for downloading resources (e.g., https://proxy.example.com:8080/), ends with a slash '/' | string | - |
+| misePackages | Comma-separated list of mise packages to install globally (e.g., 'node@lts bun yarn@1 pnpm') | string | - |
 
 ## 功能特性
 
