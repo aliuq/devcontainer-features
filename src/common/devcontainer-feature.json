@@ -64,7 +64,8 @@
     "ghcr.io/devcontainers/features/common-utils"
   ],
   "containerEnv": {
-    "LANG": "en_US.UTF-8"
+    "LANG": "en_US.UTF-8",
+    "MISE_DATA_DIR": "/usr/local/share/mise"
   },
   "postCreateCommand": {
     "trust-mise-toml": "if [ -f \"${containerWorkspaceFolder:-.}/mise.toml\" ] && type mise >/dev/null 2>&1; then mise trust -y \"${containerWorkspaceFolder:-.}\"; fi"

@@ -291,21 +291,11 @@ install_eza() {
 install_mise() {
   if command_exists mise; then
     echo "mise is already installed, skipping."
-    _update_bin_user "$(which mise)"
   else
     echo "Installing mise..."
     check_packages curl
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
     curl -fsSL https://mise.run | sh
-    # Ensure correct ownership if not installing as root
-    chown ${USERNAME}:${group_name} "${MISE_INSTALL_PATH}"
-  fi
-
-  if [ "${USERNAME}" != "root" ]; then
-    export MISE_DATA_DIR="${user_home}/.local/share/mise"
-    export MISE_STATE_DIR="${user_home}/.local/state/mise"
-    export MISE_CONFIG_DIR="${user_home}/.config/mise"
-    export MISE_CACHE_DIR="${user_home}/.cache/mise"
   fi
 
   # Set up shell integration
@@ -314,60 +304,62 @@ install_mise() {
   # ref: https://mise.jdx.dev/dev-tools/shims.html#how-to-add-mise-shims-to-path
   # bash
   if [ -f "${user_home}/.bashrc" ] && ! grep -qF 'eval "$(mise activate bash)"' "${user_home}/.bashrc"; then
-		echo 'eval "$(mise activate bash)"' >> "${user_home}/.bashrc"
-	fi
+    echo 'eval "$(mise activate bash)"' >>"${user_home}/.bashrc"
+  fi
   if [ -f "${user_home}/.bash_profile" ]; then
     if ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.bash_profile"; then
-      echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.bash_profile"
+      echo 'eval "$(mise activate bash --shims)"' >>"${user_home}/.bash_profile"
     fi
   elif [ -f "${user_home}/.profile" ]; then
     if ! grep -qF 'eval "$(mise activate bash --shims)"' "${user_home}/.profile"; then
-      echo 'eval "$(mise activate bash --shims)"' >> "${user_home}/.profile"
+      echo 'eval "$(mise activate bash --shims)"' >>"${user_home}/.profile"
     fi
   fi
+
   # zsh
   if [ ! "$use_omz" = "true" ] && [ -f "${user_home}/.zshrc" ] && ! grep -qF 'eval "$(mise activate zsh)"' "${user_home}/.zshrc"; then
-    echo 'eval "$(mise activate zsh)"' >> "${user_home}/.zshrc"
+    echo 'eval "$(mise activate zsh)"' >>"${user_home}/.zshrc"
   fi
   if [ -f "${user_home}/.zprofile" ]; then
     if ! grep -qF 'eval "$(mise activate zsh --shims)"' "${user_home}/.zprofile"; then
-      echo 'eval "$(mise activate zsh --shims)"' >> "${user_home}/.zprofile"
+      echo 'eval "$(mise activate zsh --shims)"' >>"${user_home}/.zprofile"
     fi
   fi
 
   local mise_pkg_installed=""
+  # ref: https://mise.jdx.dev/configuration.html#global-config-config-mise-config-toml
+  local mise_system_config="${MISE_SYSTEM_DIR:-"/etc/mise"}/config.toml"
 
   # install deps
   if mise which usage >/dev/null 2>&1; then
     echo "mise 'usage' package is already installed, skipping."
   else
     echo "Installing mise usage package..."
-    mise use -g -y usage
+    mise use -g -y -p "$mise_system_config" usage
     mise_pkg_installed="true"
   fi
 
   if [ -n "${MISE_PACKAGES}" ]; then
-    # Support Format: 
+    # Support Format:
     # 1. `node@lts bun yarn@1 pnpm`
     # 2. `node@lts  bun yarn@1  pnpm`
     # 3. `node@lts,bun,yarn@1,pnpm`
     # 4. `node@lts, bun, yarn@1,pnpm`
     MISE_PACKAGES="$(echo "${MISE_PACKAGES}" | tr ',' ' ' | xargs)"
-    echo "Installing mise packages: ${MISE_PACKAGES} ..."
-    mise use -g -y ${MISE_PACKAGES}
+    echo "Installing mise packages: \"${MISE_PACKAGES}\" ..."
+    mise use -g -y -p "$mise_system_config" ${MISE_PACKAGES}
     mise_pkg_installed="true"
   fi
-  
+
   # Clean cache
   if [ "$mise_pkg_installed" = "true" ]; then
     echo "Cleaning mise cache..."
     mise cache clear
   fi
 
-  # Ensure config, cache, local dirs exist with correct ownership
   if [ "${USERNAME}" != "root" ]; then
-    mkdir -p "${user_home}/.config/mise" "${user_home}/.cache" "${user_home}/.local"
-    chown -R ${USERNAME}:${group_name} "${user_home}/.config/mise" "${user_home}/.cache" "${user_home}/.local"
+    # Ensure current user has access to MISE_DATA_DIR
+    chown -R ${USERNAME}:${group_name} "${MISE_DATA_DIR:-"/usr/local/share/mise"}"
   fi
 
   # ref: https://mise.jdx.dev/installing-mise.html#autocompletion
