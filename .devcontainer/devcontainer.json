@@ -35,6 +35,5 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "updateContentCommand": "npm install -g @devcontainers/cli",
-  "remoteUser": "vscode"
+  "updateContentCommand": "npm install -g @devcontainers/cli"
 }
