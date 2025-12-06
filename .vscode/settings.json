@@ -1,0 +1,6 @@
+{
+  "cSpell.ignorePaths": [
+    "devcontainer.json",
+    "*.sh"
+  ]
+}

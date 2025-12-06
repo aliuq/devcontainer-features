@@ -21,6 +21,7 @@ INSTALL_ZSH_PLUGINS="${INSTALLZSHPLUGINS:-"true"}"
 BIN_DIR="${BINDIR:-"/usr/local/bin"}"
 PROXY_URL="${PROXYURL:-""}"
 MISE_PACKAGES="${MISEPACKAGES:-""}"
+OMZ_PLUGINS="${OMZPLUGINS:-""}"
 
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -431,11 +432,24 @@ load_zsh_plugins() {
   fi
 
   # Enable plugins in oh-my-zsh (only if not already present)
-  if ! grep -q 'plugins=.*zsh-autosuggestions' "$current_shell_rc"; then
-    sed -i 's/^plugins=(\(.*\))/plugins=(\1 zsh-autosuggestions)/' "$current_shell_rc"
+  _add_omz_plugin zsh-autosuggestions
+  _add_omz_plugin zsh-syntax-highlighting
+}
+
+# update omz with additional plugins
+update_omz_plugins() {
+  if [ ! "$use_omz" = "true" ]; then
+    return
   fi
-  if ! grep -q 'plugins=.*zsh-syntax-highlighting' "$current_shell_rc"; then
-    sed -i 's/^plugins=(\(.*\))/plugins=(\1 zsh-syntax-highlighting)/' "$current_shell_rc"
+
+  if [ -n "${OMZ_PLUGINS}" ]; then
+    # Support Format:
+    # 1. `docker docker-compose uv`
+    local omz_plugin_list="$(echo "${OMZ_PLUGINS}" | tr ',' ' ' | xargs)"
+    echo "Updating omz plugins: \"${omz_plugin_list}\" ..."
+    for plugin in ${omz_plugin_list}; do
+      _add_omz_plugin "${plugin}"
+    done
   fi
 }
 
@@ -448,5 +462,6 @@ check_packages curl git unzip ca-certificates
 [ "$INSTALL_STARSHIP" = "true" ] && install_starship
 [ "$INSTALL_ZSH_PLUGINS" = "true" ] && load_zsh_plugins
 [ "$INSTALL_MISE" = "true" ] && install_mise
+[ -n "${OMZ_PLUGINS}" ] && update_omz_plugins
 clean_up
 echo "Done!"

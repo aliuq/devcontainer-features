@@ -58,6 +58,11 @@
       "type": "string",
       "default": "",
       "description": "Comma-separated list of mise packages to install globally (e.g., 'node@lts bun yarn@1 pnpm')"
+    },
+    "omzPlugins": {
+      "type": "string",
+      "default": "",
+      "description": "Comma-separated list of additional oh-my-zsh plugins to install (e.g., 'z zsh-completions')"
     }
   },
   "installsAfter": [
