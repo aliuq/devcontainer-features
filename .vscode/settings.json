@@ -2,5 +2,9 @@
   "cSpell.ignorePaths": [
     "devcontainer.json",
     "*.sh"
-  ]
+  ],
+  "markdownlint.config": {
+    "first-line-h1": false,
+    "no-emphasis-as-heading": false
+  }
 }
