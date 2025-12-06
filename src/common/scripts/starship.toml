@@ -5,9 +5,9 @@
 palette = "dracula"
 
 
-[character]
-error_symbol = "[>](bold red)"
-success_symbol = "[>](bold green)"
+# [character]
+# error_symbol = "[❯](bold red)"
+# success_symbol = "[❯](bold green)"
 
 [cmd_duration]
 style = "bold yellow"
@@ -35,10 +35,10 @@ style = "bold dimmed white"
 
 [time]
 disabled = false
-format = '[\[ $time \]]($style) '
+# format = '[\[ $time \]]($style) '
 time_format = "%T"
 utc_time_offset = "+8"
-style = "bold dimmed blue"
+# style = "bold dimmed blue"
 
 [hostname]
 ssh_only = false
@@ -53,15 +53,18 @@ disabled = false
 
 [shell]
 style = 'bold cyan'
-format = '[$indicator]($style) '
-fish_indicator = '󰈺 '
-powershell_indicator = '>_'
+# format = '[$indicator]($style) '
+# fish_indicator = '󰈺 '
+pwsh_indicator = 'pwsh'
 disabled = false
 
 [container]
 symbol = " "
 style = "bold blue"
 format = '[$symbol $name]($style) '
+
+[status]
+disabled = false
 
 # Define Dracula color palette
 [palettes.dracula]
