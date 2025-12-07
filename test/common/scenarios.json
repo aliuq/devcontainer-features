@@ -7,7 +7,9 @@
         "configureZshAsDefaultShell": true
       },
       "common": {
-        "installStarship": true
+        "installStarship": true,
+        "installYazi": true,
+        "installHttpie": true
       }
     }
   },
@@ -15,7 +17,9 @@
     "image": "ghcr.io/aliuq/devcontainer:base",
     "features": {
       "common": {
-        "installStarship": true
+        "installStarship": true,
+        "installYazi": true,
+        "installHttpie": true
       }
     }
   },
@@ -27,7 +31,9 @@
       },
       "common": {
         "defaultShell": "bash",
-        "installStarship": true
+        "installStarship": true,
+        "installYazi": true,
+        "installHttpie": true
       }
     }
   },
@@ -35,7 +41,9 @@
     "image": "mcr.microsoft.com/devcontainers/base:alpine",
     "features": {
       "common": {
-        "installStarship": true
+        "installStarship": true,
+        "installYazi": true,
+        "installHttpie": true
       }
     }
   }
