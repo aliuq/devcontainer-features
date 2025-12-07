@@ -1,7 +1,7 @@
 
 # Common Development Tools (common)
 
-Install and configure common development tools including eza, fzf, zoxide, mise, Monaspace Nerd Font, starship, and zsh plugins
+Install and configure common development tools including eza, fzf, zoxide, mise, starship, yazi, and zsh plugins
 
 ## Example Usage
 
@@ -15,17 +15,22 @@ Install and configure common development tools including eza, fzf, zoxide, mise,
 
 | Options Id | Description | Type | Default Value |
 |-----|-----|-----|-----|
-| defaultShell | Set the default shell (bash or zsh) | string | zsh |
-| installEza | Install eza (modern replacement for ls) | boolean | true |
+| defaultShell | Default shell to configure (bash or zsh) | string | zsh |
+| installEza | Install eza (modern ls replacement) | boolean | true |
 | installFzf | Install fzf (fuzzy finder) | boolean | true |
-| installZoxide | Install zoxide (smarter cd command) | boolean | true |
-| installMise | Install mise (polyglot tool version manager) | boolean | true |
+| installZoxide | Install zoxide (smart cd) | boolean | true |
+| installMise | Install mise (tool version manager) | boolean | true |
+| misePackages | Mise packages to install globally (comma-separated, e.g., 'node@lts,bun,pnpm') | string | - |
 | installStarship | Install starship prompt | boolean | false |
-| starshipConfigUrl | URL to a starship.toml configuration file to download and use | string | - |
-| installZshPlugins | Install zsh-autosuggestions and zsh-syntax-highlighting | boolean | true |
-| proxyUrl | URL of the proxy server to use for downloading resources (e.g., https://proxy.example.com:8080/), ends with a slash '/' | string | - |
-| misePackages | Comma-separated list of mise packages to install globally (e.g., 'node@lts bun yarn@1 pnpm') | string | - |
-| omzPlugins | Comma-separated list of additional oh-my-zsh plugins to install (e.g., 'z zsh-completions') | string | - |
+| starshipUrl | Custom starship.toml URL | string | - |
+| zshPlugins | Oh-my-zsh plugins (comma-separated, e.g., 'git,docker,kubectl') | string | - |
+| zshCustomPlugins | Custom zsh plugins (comma-separated GitHub repos, e.g., 'user/repo1,user/repo2') | string | - |
+| proxyUrl | Proxy server URL (e.g., https://proxy.example.com:8080) | string | - |
+| installHttpie | Install HTTPie (HTTP client) | boolean | false |
+| installYazi | Install Yazi (terminal file manager) | boolean | false |
+| yaziFlavor | Yazi dark theme (e.g., dracula, user/repo, user/repo:theme-name) | string | dracula |
+| yaziFlavorLight | Yazi light theme (e.g., dracula, user/repo, user/repo:theme-name) | string | dracula |
+| pnpmCompletion | Enable pnpm shell completion (ref: https://pnpm.io/zh/completion) | boolean | false |
 
 ## 功能特性
 
