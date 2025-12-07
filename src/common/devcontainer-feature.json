@@ -129,6 +129,11 @@
         "AdithyanA2005/nord",
         "Miuzarte/synthwave84"
       ]
+    },
+    "pnpmCompletion": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable pnpm shell completion (ref: https://pnpm.io/zh/completion)"
     }
   },
   "installsAfter": [

@@ -26,6 +26,7 @@ ZSH_PLUGINS="${ZSHPLUGINS:-""}"
 ZSH_CUSTOM_PLUGINS="${ZSHCUSTOMPLUGINS:-""}"
 PROXY_URL="${PROXYURL:-""}"
 BIN_DIR="${BIN_DIR:-"/usr/local/bin"}"
+PNPM_COMPLETION="${PNPMCOMPLETION:-"false"}"
 
 # Get the directory where this script is located
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -628,6 +629,56 @@ install_yazi() {
   fi
 }
 
+# Enable pnpm shell completion
+# ref: https://pnpm.io/zh/completion
+enable_pnpm_completion() {
+  if ! command_exists pnpm; then
+    echo "⊘ pnpm not found, skipping completion setup"
+    return
+  fi
+
+  echo "Configuring pnpm completion..."
+
+  # 1. bash
+  local bash_cmd='source ~/.completion-for-pnpm.bash'
+  if [[ -f "${user_home}/.bashrc" ]] && ! grep -qF "$bash_cmd" "${user_home}/.bashrc"; then
+    echo "→ Setting up pnpm completion for bash"
+    pnpm completion bash >"${user_home}/.completion-for-pnpm.bash"
+    echo "$bash_cmd" >>"${user_home}/.bashrc"
+  else
+    echo "✓ pnpm bash completion already configured"
+  fi
+
+  # 2. zsh & oh-my-zsh
+  if [[ "$use_omz" == "true" && -f "${user_home}/.zshrc" ]]; then
+    local custom_plugins_dir="${ZSH_CUSTOM:-${user_home}/.oh-my-zsh/custom}/plugins"
+    local name="pnpm-shell-completion"
+    local pnpm_completion_dir="${custom_plugins_dir}/${name}"
+    if [[ ! -d "$pnpm_completion_dir" ]]; then
+      echo "→ Installing zsh plugin: ${name}"
+
+      local arch="x86_64-unknown-linux-gnu"
+      local pnpm_url="https://github.com/g-plane/${name}/releases/latest/download/${name}_${arch}.tar.gz"
+      local tmpDir="/tmp/${name}"
+
+      echo "  Downloading from: ${pnpm_url}"
+      mkdir -p "$tmpDir"
+      curl -sSL "${pnpm_url}" | tar -xz -C "$tmpDir"
+      mkdir -p "${pnpm_completion_dir}"
+      cp "$tmpDir/pnpm-shell-completion.plugin.zsh" "${pnpm_completion_dir}"
+      cp "$tmpDir/pnpm-shell-completion" "${pnpm_completion_dir}"
+      rm -rf "$tmpDir"
+      echo "  ✓ Plugin installed"
+    else
+      echo "✓ zsh plugin '${name}' already installed"
+    fi
+
+    _add_omz_plugin "${name}"
+  else
+    echo "⊘ oh-my-zsh not detected, skipping zsh completion"
+  fi
+}
+
 #
 # -----------------------------------------------------
 # Execute installations based on feature options
@@ -646,6 +697,7 @@ check_packages curl git unzip ca-certificates
 # Install mise before yazi since yazi depends on mise
 [[ "$INSTALL_MISE" == "true" ]] && install_mise
 [[ "$INSTALL_YAZI" == "true" ]] && install_yazi
+[[ "$PNPM_COMPLETION" == "true" ]] && enable_pnpm_completion
 # Install zsh plugins at the end
 install_zsh_plugins
 
