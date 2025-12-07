@@ -1,6 +1,7 @@
 {
   "cSpell.ignorePaths": [
     "devcontainer.json",
+    "devcontainer-feature.json",
     "*.sh"
   ],
   "markdownlint.config": {

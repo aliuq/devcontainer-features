@@ -3,12 +3,12 @@
   "name": "Common Development Tools",
   "version": "0.0.18",
   "documentationURL": "https://github.com/aliuq/devcontainer-features/tree/main/src/common",
-  "description": "Install and configure common development tools including eza, fzf, zoxide, mise, Monaspace Nerd Font, starship, and zsh plugins",
+  "description": "Install and configure common development tools including eza, fzf, zoxide, mise, starship, yazi, and zsh plugins",
   "options": {
     "defaultShell": {
       "type": "string",
       "default": "zsh",
-      "description": "Set the default shell (bash or zsh)",
+      "description": "Default shell to configure (bash or zsh)",
       "enum": [
         "bash",
         "zsh"
@@ -17,7 +17,7 @@
     "installEza": {
       "type": "boolean",
       "default": true,
-      "description": "Install eza (modern replacement for ls)"
+      "description": "Install eza (modern ls replacement)"
     },
     "installFzf": {
       "type": "boolean",
@@ -27,42 +27,108 @@
     "installZoxide": {
       "type": "boolean",
       "default": true,
-      "description": "Install zoxide (smarter cd command)"
+      "description": "Install zoxide (smart cd)"
     },
     "installMise": {
       "type": "boolean",
       "default": true,
-      "description": "Install mise (polyglot tool version manager)"
+      "description": "Install mise (tool version manager)"
+    },
+    "misePackages": {
+      "type": "string",
+      "default": "",
+      "description": "Mise packages to install globally (comma-separated, e.g., 'node@lts,bun,pnpm')"
     },
     "installStarship": {
       "type": "boolean",
       "default": false,
       "description": "Install starship prompt"
     },
-    "starshipConfigUrl": {
+    "starshipUrl": {
       "type": "string",
       "default": "",
-      "description": "URL to a starship.toml configuration file to download and use"
+      "description": "Custom starship.toml URL"
     },
-    "installZshPlugins": {
-      "type": "boolean",
-      "default": true,
-      "description": "Install zsh-autosuggestions and zsh-syntax-highlighting"
+    "zshPlugins": {
+      "type": "string",
+      "default": "",
+      "description": "Oh-my-zsh plugins (comma-separated, e.g., 'git,docker,kubectl')"
+    },
+    "zshCustomPlugins": {
+      "type": "string",
+      "default": "",
+      "description": "Custom zsh plugins (comma-separated GitHub repos, e.g., 'user/repo1,user/repo2')"
     },
     "proxyUrl": {
       "type": "string",
       "default": "",
-      "description": "URL of the proxy server to use for downloading resources (e.g., https://proxy.example.com:8080/), ends with a slash '/'"
+      "description": "Proxy server URL (e.g., https://proxy.example.com:8080)"
     },
-    "misePackages": {
-      "type": "string",
-      "default": "",
-      "description": "Comma-separated list of mise packages to install globally (e.g., 'node@lts bun yarn@1 pnpm')"
+    "installHttpie": {
+      "type": "boolean",
+      "default": false,
+      "description": "Install HTTPie (HTTP client)"
     },
-    "omzPlugins": {
+    "installYazi": {
+      "type": "boolean",
+      "default": false,
+      "description": "Install Yazi (terminal file manager)"
+    },
+    "yaziFlavor": {
       "type": "string",
-      "default": "",
-      "description": "Comma-separated list of additional oh-my-zsh plugins to install (e.g., 'z zsh-completions')"
+      "default": "dracula",
+      "description": "Yazi dark theme (e.g., dracula, user/repo, user/repo:theme-name)",
+      "proposals": [
+        "dracula",
+        "catppuccin-mocha",
+        "catppuccin-latte",
+        "catppuccin-frappe",
+        "catppuccin-macchiato",
+        "BennyOe/tokyo-night",
+        "dangooddd/kanagawa",
+        "marcosvnmelo/kanagawa-dragon",
+        "muratoffalex/kanagawa-lotus",
+        "bennyyip/gruvbox-dark",
+        "kmlupreti/ayu-dark",
+        "Chromium-3-Oxide/everforest-medium",
+        "ficd0/ashen:ashen",
+        "gosxrgxx/flexoki-dark",
+        "gosxrgxx/flexoki-light",
+        "Mintass/rose-pine",
+        "Mintass/rose-pine-moon",
+        "Mintass/rose-pine-dawn",
+        "tomer-ben-david/neon",
+        "AdithyanA2005/nord",
+        "Miuzarte/synthwave84"
+      ]
+    },
+    "yaziFlavorLight": {
+      "type": "string",
+      "default": "dracula",
+      "description": "Yazi light theme (e.g., dracula, user/repo, user/repo:theme-name)",
+      "proposals": [
+        "dracula",
+        "catppuccin-mocha",
+        "catppuccin-latte",
+        "catppuccin-frappe",
+        "catppuccin-macchiato",
+        "BennyOe/tokyo-night",
+        "dangooddd/kanagawa",
+        "marcosvnmelo/kanagawa-dragon",
+        "muratoffalex/kanagawa-lotus",
+        "bennyyip/gruvbox-dark",
+        "kmlupreti/ayu-dark",
+        "Chromium-3-Oxide/everforest-medium",
+        "ficd0/ashen:ashen",
+        "gosxrgxx/flexoki-dark",
+        "gosxrgxx/flexoki-light",
+        "Mintass/rose-pine",
+        "Mintass/rose-pine-moon",
+        "Mintass/rose-pine-dawn",
+        "tomer-ben-david/neon",
+        "AdithyanA2005/nord",
+        "Miuzarte/synthwave84"
+      ]
     }
   },
   "installsAfter": [
@@ -70,6 +136,7 @@
   ],
   "containerEnv": {
     "LANG": "en_US.UTF-8",
-    "MISE_DATA_DIR": "/usr/local/share/mise"
+    "MISE_DATA_DIR": "/usr/local/share/mise",
+    "MISE_SYSTEM_DIR": "/etc/mise"
   }
 }
