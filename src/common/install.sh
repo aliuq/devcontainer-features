@@ -578,29 +578,21 @@ _add_yazi_flavor() {
 install_yazi() {
   if command_exists yazi; then
     echo "✓ yazi already installed"
-    return
+  else
+    if ! command_exists mise; then
+      echo "⊘ yazi requires mise, please enable 'installMise' option"
+      return
+    fi
+
+    echo "Installing yazi..."
+
+    check_packages file
+    # Install yazi via mise
+    _mise_install_pkg yazi@latest
   fi
 
-  if ! command_exists mise; then
-    echo "⊘ yazi requires mise, please enable 'installMise' option"
-    return
-  fi
-
-  echo "Installing yazi..."
-  check_packages file
-  # Install yazi via mise
-  _mise_install_pkg yazi@latest
-}
-
-# Configure yazi flavors
-configure_yazi_flavors() {
   # Skip flavor installation if not specified
   if [[ -z "${YAZI_FLAVOR}" && -z "${YAZI_FLAVOR_LIGHT}" ]]; then
-    return
-  fi
-
-  if ! command_exists yazi; then
-    echo "Warning: yazi not installed, skipping flavor configuration"
     return
   fi
 
@@ -654,8 +646,6 @@ check_packages curl git unzip ca-certificates
 # Install mise before yazi since yazi depends on mise
 [[ "$INSTALL_MISE" == "true" ]] && install_mise
 [[ "$INSTALL_YAZI" == "true" ]] && install_yazi
-# Configure yazi flavors after yazi installation
-[[ "$INSTALL_YAZI" == "true" ]] && configure_yazi_flavors
 # Install zsh plugins at the end
 install_zsh_plugins
 
