@@ -9,7 +9,8 @@
       "common": {
         "installStarship": true,
         "installYazi": true,
-        "installHttpie": true
+        "installHttpie": true,
+        "pnpmCompletion": true
       }
     }
   },
@@ -19,7 +20,8 @@
       "common": {
         "installStarship": true,
         "installYazi": true,
-        "installHttpie": true
+        "installHttpie": true,
+        "pnpmCompletion": true
       }
     }
   },
@@ -33,7 +35,8 @@
         "defaultShell": "bash",
         "installStarship": true,
         "installYazi": true,
-        "installHttpie": true
+        "installHttpie": true,
+        "pnpmCompletion": true
       }
     }
   },
@@ -43,7 +46,8 @@
       "common": {
         "installStarship": true,
         "installYazi": true,
-        "installHttpie": true
+        "installHttpie": true,
+        "pnpmCompletion": true
       }
     }
   }
