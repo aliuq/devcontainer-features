@@ -1,7 +1,7 @@
 {
   "id": "common",
   "name": "Common Development Tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "documentationURL": "https://github.com/aliuq/devcontainer-features/tree/main/src/common",
   "description": "Install and configure common development tools including eza, fzf, zoxide, mise, starship, yazi, and zsh plugins",
   "options": {
