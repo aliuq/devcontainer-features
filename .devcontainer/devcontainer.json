@@ -30,13 +30,17 @@
     // `./common` OR `ghcr.io/aliuq/devcontainer-features/common:0`
     "ghcr.io/aliuq/devcontainer-features/common:0": {
       "installStarship": "true",
-      "omzPlugins": "node bun bun yarn",
-      "misePackages": "shfmt@latest node@lts bun yarn@1 pnpm"
+      "installYazi": "true",
+      "installHttpie": "true",
+      "misePackages": "shfmt@latest node@lts bun yarn@1 pnpm",
+      "zshPlugins": "bun docker docker-compose gh",
+      "pnpmCompletion": "true"
       // Set this variable if you hit rate limiting issues with GitHub API
       // "MISE_GITHUB_TOKEN": ""
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "updateContentCommand": "npm install -g @devcontainers/cli"
+  "updateContentCommand": "npm install -g @devcontainers/cli",
+  "remoteUser": "vscode"
 }
