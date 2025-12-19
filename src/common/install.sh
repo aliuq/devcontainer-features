@@ -217,6 +217,44 @@ _add_shell_config() {
   fi
 }
 
+# Add content block to zshrc file if not already present
+# Usage: _add_to_rc <content> [begin_marker] [rc_path]
+# - content: The text block to add
+# - begin_marker: Optional line to check for existence (defaults to first non-empty line)
+# - rc_path: Optional path to rc file (defaults to user's .zshrc)
+_add_to_rc() {
+  local content="$1"
+  
+  # Skip if content is empty
+  [[ -z "$content" ]] && return
+
+  local rc_path="${2:-${user_home}/.zshrc}"
+  local content_lines_count=$(echo -e "$content" | wc -l)
+  local n=1
+  local begin_marker="${3:-"$(echo -e "$content" | head -n${n} | tail -n1)"}"
+
+  # Find first non-empty line to use as marker if begin_marker is empty
+  while [[ -z "$begin_marker" && $n -lt $content_lines_count ]]; do
+    n=$((n + 1))
+    begin_marker="$(echo -e "$content" | head -n${n} | tail -n1)"
+  done
+
+  # Exit if no valid marker found
+  if [[ -z "$begin_marker" ]]; then
+    echo "Error: Unable to determine a non-empty begin marker from content."
+    return
+  fi
+
+  # Add content only if file exists and marker not found
+  if [[ -f "$rc_path" ]]; then
+    if ! grep -qF "$begin_marker" "$rc_path"; then
+      echo -e "$content" >>"$rc_path"
+    fi
+  else
+    echo "Warning: RC file not found: $rc_path"
+  fi
+}
+
 # Update binary ownership to match target user
 _update_bin_user() {
   local bin_path="$1"
@@ -679,6 +717,25 @@ enable_pnpm_completion() {
   fi
 }
 
+setup_custom_alias() {
+  local cls_content="\nalias cls=\"clear\""
+  _add_to_rc "$cls_content"
+  _add_to_rc "$cls_content" "${user_home}/.bashrc"
+
+  local file_content=$(cat <<'EOF'
+# Load custom zsh files from .vscode/shell directory
+if [ -d "$PWD/.vscode/shell" ]; then
+  for alias_file in "$PWD/.vscode/shell/"**/*.zsh; do
+    [ -e "$alias_file" ] && source "$alias_file"
+  done
+fi
+EOF
+)
+
+  _add_to_rc "$file_content"
+  _add_to_rc "$file_content" "${user_home}/.bashrc"
+}
+
 #
 # -----------------------------------------------------
 # Execute installations based on feature options
@@ -700,6 +757,7 @@ check_packages curl git unzip ca-certificates
 [[ "$PNPM_COMPLETION" == "true" ]] && enable_pnpm_completion
 # Install zsh plugins at the end
 install_zsh_plugins
+setup_custom_alias
 
 # Fix ownership of user home directory
 if [[ "${USERNAME}" != "root" ]]; then
