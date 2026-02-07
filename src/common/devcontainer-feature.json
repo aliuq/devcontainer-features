@@ -142,6 +142,7 @@
   "containerEnv": {
     "LANG": "en_US.UTF-8",
     "MISE_DATA_DIR": "/usr/local/share/mise",
-    "MISE_SYSTEM_DIR": "/etc/mise"
+    "MISE_SYSTEM_DIR": "/etc/mise",
+    "MISE_TRUSTED_CONFIG_PATHS": "${containerWorkspaceFolder:-.}"
   }
 }
