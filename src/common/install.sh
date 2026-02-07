@@ -224,7 +224,7 @@ _add_shell_config() {
 # - rc_path: Optional path to rc file (defaults to user's .zshrc)
 _add_to_rc() {
   local content="$1"
-  
+
   # Skip if content is empty
   [[ -z "$content" ]] && return
 
@@ -722,7 +722,19 @@ setup_custom_alias() {
   _add_to_rc "$cls_content"
   _add_to_rc "$cls_content" "${user_home}/.bashrc"
 
-  local file_content=$(cat <<'EOF'
+  local bind_h="\nbindkey '^H' backward-kill-word"
+  _add_to_rc "$bind_h"
+  _add_to_rc "$bind_h" "${user_home}/.bashrc"
+
+  local file_content=$(
+    cat <<'EOF'
+# Load custom zsh files from .devcontainer/shell directory
+if [ -d "$PWD/.devcontainer/shell" ]; then
+  for alias_file in "$PWD/.devcontainer/shell/"**/*.zsh; do
+    [ -e "$alias_file" ] && source "$alias_file"
+  done
+fi
+
 # Load custom zsh files from .vscode/shell directory
 if [ -d "$PWD/.vscode/shell" ]; then
   for alias_file in "$PWD/.vscode/shell/"**/*.zsh; do
@@ -730,7 +742,7 @@ if [ -d "$PWD/.vscode/shell" ]; then
   done
 fi
 EOF
-)
+  )
 
   _add_to_rc "$file_content"
   _add_to_rc "$file_content" "${user_home}/.bashrc"
