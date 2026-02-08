@@ -285,6 +285,22 @@ if [[ "$current_shell" == "zsh" && -n "$current_shell_rc" ]] && grep -q 'source 
   use_omz="true"
 fi
 
+# set /bin/zsh as default shell for user if zsh is installed and not already default
+setup_default_shell() {
+  if [[ "$current_shell" == "zsh" ]] && command_exists zsh; then
+    # ref: https://github.com/devcontainers/features/blob/main/src/common-utils/main.sh
+    # Fixing chsh always asking for a password on alpine linux
+    # ref: https://askubuntu.com/questions/812420/chsh-always-asking-a-password-and-get-pam-authentication-failure.
+    if [ ! -f "/etc/pam.d/chsh" ] || ! grep -Eq '^auth(.*)pam_rootok\.so$' /etc/pam.d/chsh; then
+      echo "auth sufficient pam_rootok.so" >>/etc/pam.d/chsh
+    elif [[ -n "$(awk '/^auth(.*)pam_rootok\.so$/ && !/^auth[[:blank:]]+sufficient[[:blank:]]+pam_rootok\.so$/' /etc/pam.d/chsh)" ]]; then
+      awk '/^auth(.*)pam_rootok\.so$/ { $2 = "sufficient" } { print }' /etc/pam.d/chsh >/tmp/chsh.tmp && mv /tmp/chsh.tmp /etc/pam.d/chsh
+    fi
+
+    chsh --shell /bin/zsh ${USERNAME}
+  fi
+}
+
 # Install fzf (fuzzy finder)
 # https://junegunn.github.io/fzf/installation/
 install_fzf() {
@@ -770,6 +786,7 @@ check_packages curl git unzip ca-certificates
 # Install zsh plugins at the end
 install_zsh_plugins
 setup_custom_alias
+setup_default_shell
 
 # Fix ownership of user home directory
 if [[ "${USERNAME}" != "root" ]]; then
