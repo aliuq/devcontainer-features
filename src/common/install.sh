@@ -298,6 +298,7 @@ setup_default_shell() {
     fi
 
     chsh --shell /bin/zsh ${USERNAME}
+    echo "✓ Set default shell to /bin/zsh for user ${USERNAME}"
   fi
 }
 
