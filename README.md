@@ -1,8 +1,8 @@
 # DevContainer Features
 
-[![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/aliuq/devcontainer-features/refs/heads/main/src/common/devcontainer-feature.json&query=$.version&label=version)](https://github.com/aliuq/devcontainer-features)
-[![CI](https://img.shields.io/github/actions/workflow/status/aliuq/devcontainer-features/test.yaml?label=CI%20Test)](./.github/workflows/test.yaml)
-[![images](https://img.shields.io/badge/devcontainer--images-blue?logo=github)](https://github.com/aliuq/devcontainer-images)
+[![Version](https://shields.xod.cc/badge/dynamic/json?url=https://raw.githubusercontent.com/aliuq/devcontainer-features/refs/heads/main/src/common/devcontainer-feature.json&query=$.version&label=version)](https://github.com/aliuq/devcontainer-features)
+[![CI](https://shields.xod.cc/github/actions/workflow/status/aliuq/devcontainer-features/test.yaml?label=CI%20Test)](./.github/workflows/test.yaml)
+[![images](https://shields.xod.cc/badge/devcontainer--images-blue?logo=github)](https://github.com/aliuq/devcontainer-images)
 
 A lightweight collection of useful CLI tools and shell integrations for DevContainers. Designed to improve the developer experience in containerized environments.
 
