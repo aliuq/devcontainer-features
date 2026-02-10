@@ -11,8 +11,10 @@ Set `MISE_GITHUB_TOKEN` on your machine to a GitHub Personal Access Token to avo
 ```json
 // .devcontainer/devcontainer.json
 {
-  "ghcr.io/aliuq/devcontainer-features/common:0": {
-    "MISE_GITHUB_TOKEN": "${localEnv:MISE_GITHUB_TOKEN}"
+  "features": {
+    "ghcr.io/aliuq/devcontainer-features/common:0": {
+      "MISE_GITHUB_TOKEN": "${localEnv:MISE_GITHUB_TOKEN}"
+    }
   }
 }
 ```
