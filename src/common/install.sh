@@ -345,6 +345,8 @@ install_zoxide() {
     # Execute the modified script
     sh "$install_script" --bin-dir="$BIN_DIR"
     rm -f "$install_script"
+    # Remove any leftover files from the installation script
+    rm -rf /tmp/zoxide_*
   fi
 
   # Set up shell integration
