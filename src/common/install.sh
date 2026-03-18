@@ -743,7 +743,6 @@ setup_custom_alias() {
 
   local bind_h="\nbindkey '^H' backward-kill-word"
   _add_to_rc "$bind_h"
-  _add_to_rc "$bind_h" "${user_home}/.bashrc"
 
   local file_content=$(
     cat <<'EOF'
