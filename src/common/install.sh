@@ -397,6 +397,9 @@ install_mise() {
   else
     echo "Installing mise..."
 
+    # Fix error on Alpine: "tar: invalid tar magic"
+    check_packages tar
+
     export MISE_INSTALL_PATH="${BIN_DIR}/mise"
     curl -fsSL https://mise.run | sh
   fi
