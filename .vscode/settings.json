@@ -12,5 +12,10 @@
     "direnv",
     "pyenv",
     "Yazi"
+  ],
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/commit-instructions.md"
+    }
   ]
 }

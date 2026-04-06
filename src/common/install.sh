@@ -15,6 +15,7 @@ INSTALL_EZA="${INSTALLEZA:-"true"}"
 INSTALL_FZF="${INSTALLFZF:-"true"}"
 INSTALL_ZOXIDE="${INSTALLZOXIDE:-"true"}"
 INSTALL_MISE="${INSTALLMISE:-"true"}"
+MISE_FORCE_UPGRADE="${MISEFORCEUPGRADE:-"false"}"
 MISE_PACKAGES="${MISEPACKAGES:-""}"
 INSTALL_STARSHIP="${INSTALLSTARSHIP:-"false"}"
 STARSHIP_URL="${STARSHIPURL:-""}"
@@ -281,7 +282,7 @@ fi
 
 # Detect if oh-my-zsh is installed
 use_omz="false"
-if [[ "$current_shell" == "zsh" && -n "$current_shell_rc" ]] && grep -q 'source $ZSH/oh-my-zsh.sh' "$current_shell_rc"; then
+if [[ "$current_shell" == "zsh" && -n "$current_shell_rc" ]] && grep -q 'source $ZSH/oh-my-zsh.sh' "$current_shell_rc" 2>/dev/null; then
   use_omz="true"
 fi
 
@@ -291,13 +292,30 @@ setup_default_shell() {
     # ref: https://github.com/devcontainers/features/blob/main/src/common-utils/main.sh
     # Fixing chsh always asking for a password on alpine linux
     # ref: https://askubuntu.com/questions/812420/chsh-always-asking-a-password-and-get-pam-authentication-failure.
-    if [ ! -f "/etc/pam.d/chsh" ] || ! grep -Eq '^auth(.*)pam_rootok\.so$' /etc/pam.d/chsh; then
-      echo "auth sufficient pam_rootok.so" >>/etc/pam.d/chsh
-    elif [[ -n "$(awk '/^auth(.*)pam_rootok\.so$/ && !/^auth[[:blank:]]+sufficient[[:blank:]]+pam_rootok\.so$/' /etc/pam.d/chsh)" ]]; then
-      awk '/^auth(.*)pam_rootok\.so$/ { $2 = "sufficient" } { print }' /etc/pam.d/chsh >/tmp/chsh.tmp && mv /tmp/chsh.tmp /etc/pam.d/chsh
+    if [[ -f "/etc/pam.d/chsh" ]]; then
+      if ! grep -Eq '^auth(.*)pam_rootok\.so$' /etc/pam.d/chsh; then
+        echo "auth sufficient pam_rootok.so" >>/etc/pam.d/chsh
+      elif [[ -n "$(awk '/^auth(.*)pam_rootok\.so$/ && !/^auth[[:blank:]]+sufficient[[:blank:]]+pam_rootok\.so$/' /etc/pam.d/chsh)" ]]; then
+        awk '/^auth(.*)pam_rootok\.so$/ { $2 = "sufficient" } { print }' /etc/pam.d/chsh >/tmp/chsh.tmp && mv /tmp/chsh.tmp /etc/pam.d/chsh
+      fi
     fi
 
-    chsh --shell /bin/zsh ${USERNAME}
+    if command_exists chsh; then
+      chsh --shell /bin/zsh ${USERNAME}
+    else
+      local passwd_entry
+      passwd_entry="$(getent passwd "${USERNAME}")"
+      if [[ -z "$passwd_entry" ]]; then
+        echo "Error: Unable to find passwd entry for ${USERNAME}"
+        exit 1
+      fi
+      local current_login_shell
+      current_login_shell="$(echo "$passwd_entry" | cut -d: -f7)"
+      if [[ "$current_login_shell" != "/bin/zsh" ]]; then
+        awk -F: -v user="${USERNAME}" 'BEGIN { OFS = ":" } $1 == user { $7 = "/bin/zsh" } { print }' /etc/passwd >/tmp/passwd.tmp
+        mv /tmp/passwd.tmp /etc/passwd
+      fi
+    fi
     echo "✓ Set default shell to /bin/zsh for user ${USERNAME}"
   fi
 }
@@ -332,7 +350,15 @@ install_zoxide() {
 
     # Download install script to local file
     local install_script="/tmp/zoxide-install.sh"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o "$install_script"
+    local zoxide_url="https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"
+    # Add GITHUB_TOKEN to header for private repo access if specified
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+      echo "→ Using GITHUB_TOKEN for authenticated download"
+      curl -sSfL -H "Authorization: Bearer ${GITHUB_TOKEN}" "$zoxide_url" -o "$install_script"
+    else
+      curl -sSfL "$zoxide_url" -o "$install_script"
+    fi
+    echo "→ Downloaded zoxide install script to $install_script"
 
     # Apply proxy configuration if specified
     if [[ -n "$PROXY_URL" ]]; then
@@ -394,6 +420,11 @@ _mise_install_pkg() {
 install_mise() {
   if command_exists mise; then
     echo "✓ mise already installed"
+
+    if [[ "$MISE_FORCE_UPGRADE" == "true" ]]; then
+      echo "→ Upgrading mise to the latest version..."
+      mise self-update -y
+    fi
   else
     echo "Installing mise..."
 

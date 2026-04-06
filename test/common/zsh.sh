@@ -23,8 +23,21 @@ check "zoxide integration" bash -c 'grep -q "zoxide" ~/.zshrc && exit 0 || exit 
 # mise
 check "mise installed" mise --version
 check "mise integration" bash -c 'grep -q "mise" ~/.zshrc && exit 0 || exit 1'
-# starship
+activateMiseShims
+# starship (installStarship=true in this scenario)
 check "starship installed" starship --version
 check "starship integration" bash -c 'grep -q "starship" ~/.zshrc && exit 0 || exit 1'
+# httpie (installHttpie=true in this scenario)
+check "httpie installed" http --version
+# yazi (installYazi=true in this scenario)
+check "yazi installed" yazi --version
+# pnpmCompletion=true — verify configured (ok to skip if pnpm absent)
+check "pnpm completion configured" bash -c '
+  if command -v pnpm &>/dev/null; then
+    grep -qF "completion-for-pnpm" ~/.zshrc && exit 0 || exit 1
+  else
+    exit 0
+  fi
+'
 
 reportResults

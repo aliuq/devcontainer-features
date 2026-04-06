@@ -1,1 +1,7 @@
 .devcontainer/common
+test-images
+
+node_modules
+dist
+.clack-kit
+.env

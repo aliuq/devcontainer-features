@@ -50,5 +50,40 @@
         "pnpmCompletion": true
       }
     }
+  },
+  "minimal": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {
+        "installZsh": true,
+        "configureZshAsDefaultShell": true
+      },
+      "common": {}
+    }
+  },
+  "mise-packages": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {
+        "installZsh": true,
+        "configureZshAsDefaultShell": true
+      },
+      "common": {
+        "misePackages": "node@lts"
+      }
+    }
+  },
+  "zsh-plugins": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {
+        "installZsh": true,
+        "configureZshAsDefaultShell": true,
+        "installOhMyZsh": true
+      },
+      "common": {
+        "zshPlugins": "git,docker"
+      }
+    }
   }
 }

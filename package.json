@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "mise run test",
+    "cleanup": "mise run cleanup"
+  },
+  "dependencies": {
+    "clack-kit": "^0.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
